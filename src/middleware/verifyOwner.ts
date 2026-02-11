@@ -7,6 +7,7 @@ export const verifyOwner = async (req: Request, res: Response, next: NextFunctio
     const { repoName, key } = req.body;
     if (!repoName || !key) {
         res.status(400).json({ error: "Missing key or RepoName" });
+        return;
     }
     try {
         const octokit = await getAuthenticatedOctokit();
@@ -21,11 +22,13 @@ export const verifyOwner = async (req: Request, res: Response, next: NextFunctio
         const incomingHash = hashKey(key);
         if (incomingHash != metadata.hashedKey) {
             res.status(403).json({ error: "Invalid key, permission denied" });
+            return;
         }
         res.locals.metaSha = metaFile.sha;
         next();
     } catch (error) {
         console.log("error in verifying the owner", error);
         res.status(404).json({ error: 'metaData.json not found or repo invalid' });
+        return;
     }
 }
